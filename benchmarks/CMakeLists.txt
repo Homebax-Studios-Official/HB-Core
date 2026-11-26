@@ -1,0 +1,3 @@
+add_executable(hb_bench_pipeline bench_pipeline.cpp)
+target_link_libraries(hb_bench_pipeline PRIVATE HB::CoreStatic hb_engine)
+hbcore_warnings(hb_bench_pipeline)

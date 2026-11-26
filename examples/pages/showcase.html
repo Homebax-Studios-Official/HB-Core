@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>HB Core – ukázka</title>
+<style>
+  :root { --accent: #0b5cad; }
+  body { background: #f4f6fa; font-size: 14px; }
+  h1 { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+  .card { background: #ffffff; border: 1px solid #c8ccd4; padding: 10px; margin: 12px 0; width: 420px; }
+  .card h2 { margin-top: 0; font-size: 18px; }
+  mark { background: #ffe066; }
+  .center { text-align: center; color: #666; }
+  @media (max-width: 300px) { .card { width: auto; } }
+</style>
+</head>
+<body>
+<h1>HB Core 0.1.0</h1>
+<div class="card">
+  <h2>Čeština a styly</h2>
+  <p>Příliš žluťoučký kůň úpěl ďábelské ódy. Text je <b>tučný</b>, <i>kurzíva</i>, <u>podtržený</u> a <mark>zvýrazněný</mark>.</p>
+</div>
+<div class="card">
+  <ul><li>První položka</li><li>Druhá položka</li></ul>
+  <ol><li>Jedna</li><li>Dvě</li></ol>
+</div>
+<p class="center">Independent browser engine &copy; Homebax Studios</p>
+<hr>
+<pre>pre:
+  zachovává   mezery</pre>
+</body>
+</html>

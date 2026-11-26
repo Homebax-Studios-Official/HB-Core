@@ -1,0 +1,17 @@
+{
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "build\\linux-debug",
+      "build\\linux-release",
+      "build\\windows-msvc-release",
+      "build\\windows-win7-release",
+      "build\\android-arm64-release"
+    ]
+  },
+  "ExpandedNodes": [
+    "",
+    "\\third_party"
+  ],
+  "SelectedNode": "\\CMakePresets.json",
+  "PreviewInSolutionExplorer": false
+}

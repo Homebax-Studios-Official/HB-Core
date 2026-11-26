@@ -1,0 +1,63 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}"
+    },
+    {
+      "name": "linux-debug",
+      "inherits": "base",
+      "displayName": "Linux Debug (verified in 0.1.0)",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "HBCORE_WARNINGS_AS_ERRORS": "ON" }
+    },
+    {
+      "name": "linux-release",
+      "inherits": "base",
+      "displayName": "Linux Release (verified in 0.1.0)",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "HBCORE_WARNINGS_AS_ERRORS": "ON" }
+    },
+    {
+      "name": "windows-msvc-release",
+      "inherits": "base",
+      "displayName": "Windows x64 MSVC Release (NOT yet verified)",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "architecture": { "value": "x64", "strategy": "external" },
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": "cl", "CMAKE_CXX_COMPILER": "cl" }
+    },
+    {
+      "name": "windows-win7-release",
+      "inherits": "windows-msvc-release",
+      "displayName": "Windows 7 API level (NOT yet verified)",
+      "cacheVariables": { "HBCORE_TARGET_WIN7": "ON" }
+    },
+    {
+      "name": "android-arm64-release",
+      "inherits": "base",
+      "displayName": "Android ARM64 (NOT yet verified; needs ANDROID_NDK_HOME)",
+      "toolchainFile": "$env{ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-24",
+        "HBCORE_BUILD_TESTS": "OFF",
+        "HBCORE_BUILD_EXAMPLES": "OFF",
+        "HBCORE_BUILD_BENCHMARKS": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "linux-debug", "configurePreset": "linux-debug" },
+    { "name": "linux-release", "configurePreset": "linux-release" },
+    { "name": "windows-msvc-release", "configurePreset": "windows-msvc-release" },
+    { "name": "windows-win7-release", "configurePreset": "windows-win7-release" },
+    { "name": "android-arm64-release", "configurePreset": "android-arm64-release" }
+  ],
+  "testPresets": [
+    { "name": "linux-debug", "configurePreset": "linux-debug", "output": { "outputOnFailure": true } },
+    { "name": "linux-release", "configurePreset": "linux-release", "output": { "outputOnFailure": true } }
+  ]
+}

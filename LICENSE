@@ -1,0 +1,77 @@
+HOMEBAX STUDIOS NON-COMMERCIAL LICENSE
+Version 1.0 (2026)
+
+Copyright (c) 2026 Ondrej Jurasik / Homebax Studios.
+All rights reserved except as granted below.
+
+This license is NOT the MIT, Apache or GPL license and is NOT an OSI-approved open source
+license. It is a source-available, non-commercial license.
+
+"Software" means HB Core (the independent web browser engine SDK), all of its source code,
+binaries, documentation, branding and resources distributed with this license.
+"Licensor" means Ondrej Jurasik / Homebax Studios.
+"HB Browser" means the browser project of Homebax Studios.
+"Non-Commercial Use" means use that is not primarily intended for, or directed toward,
+commercial advantage or monetary compensation.
+
+1. GRANT
+   Subject to the conditions below, you may use, copy, modify, and redistribute the Software
+   for Non-Commercial Use, free of charge.
+
+2. COMMERCIAL USE
+   Any commercial use of the Software, including selling it, bundling it into a product or
+   service that is sold or monetised, or offering it as a paid service, is not permitted
+   without a separate commercial license. A commercial license requires the prior written
+   consent of Homebax Studios.
+
+3. REDISTRIBUTION
+   Redistribution of the Software, with or without modification, is permitted only under the
+   conditions of this license. You must give every recipient a copy of this license and the
+   files COPYRIGHT.md and THIRD_PARTY_NOTICES.md.
+
+4. ATTRIBUTION AND NOTICES
+   a. You must keep the copyright notice "Copyright (c) 2026 Ondrej Jurasik / Homebax Studios"
+      and all license notices in every copy and in every modified or derived version.
+   b. Derived versions must name the original author (Ondrej Jurasik / Homebax Studios) and
+      the original project (HB Core).
+   c. You must state the changes you made, in a way that a reader can see that the files were
+      modified and by whom.
+   d. You must not remove or alter information about the origin of the project.
+   e. You must not remove the "Homebax Studios" name or brand marks from the Software, and you
+      must not use the Homebax Studios or HB Core names or logos to endorse or promote
+      derived works, without written permission.
+
+5. EXCEPTION: HB BROWSER
+   Notwithstanding Section 2, Homebax Studios may integrate the Software into HB Browser and
+   may use and distribute the Software as part of HB Browser, including internal use and
+   distribution of HB Browser builds that contain the Software, under the permissions that
+   Homebax Studios grants for HB Browser itself. This exception applies to HB Browser as
+   published by Homebax Studios and does not extend to third parties, to other products, or to
+   forks of HB Browser, unless Homebax Studios grants it in writing.
+
+6. THIRD-PARTY COMPONENTS
+   Third-party components remain under their own licenses and copyright. Nothing in this
+   license changes their terms. See THIRD_PARTY_NOTICES.md. You must not remove or alter their
+   copyright and license notices.
+
+7. TERMINATION
+   Your rights end automatically if you violate this license. They are reinstated if you stop
+   the violation within 30 days of becoming aware of it, unless the Licensor notifies you
+   otherwise in writing.
+
+8. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NON-INFRINGEMENT. HB Core 0.1.0 is an early version and is not suitable for rendering
+   untrusted content in security-sensitive products (see SECURITY.md).
+
+9. LIMITATION OF LIABILITY
+   TO THE EXTENT PERMITTED BY LAW, THE LICENSOR IS NOT LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+10. GENERAL
+    Rights not expressly granted are reserved. If a provision is unenforceable, the remaining
+    provisions stay in effect.
+
+Note: this license text was drafted for the project and has not been reviewed by a lawyer.
+Have it reviewed before relying on it in a commercial or legal context.
