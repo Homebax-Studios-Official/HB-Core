@@ -7,8 +7,11 @@ the legal compatibility is resolved.
 
 ## Shipped with HB Core 0.1.0
 
-HB Core 0.1.0 links **no** third-party runtime library. The engine uses only the C++20
-standard library.
+HB Core links **no** third-party runtime library (0.1.0 and 0.2.0). The engine uses only the C++20
+standard library. The PNG/inflate decoder and the TrueType reader are own implementations.
+
+**System fonts:** 0.2.0 loads TrueType font files that are already installed on the machine (e.g. Segoe UI/Arial,
+Liberation, DejaVu, Noto, Roboto). No font file is bundled or redistributed with HB Core; each font stays under its own license.
 
 ### font8x8 (glyph data) - public domain
 | Field | Value |

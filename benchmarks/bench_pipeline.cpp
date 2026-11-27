@@ -1,5 +1,6 @@
 // Measures the 0.1.0 pipeline on a generated document. Numbers are machine-specific; compare only on one machine.
 #include "engine/page.hpp"
+#include "graphics/fonts.hpp"
 #include "html/parser.hpp"
 #include <chrono>
 #include <cstdio>
@@ -32,5 +33,23 @@ int main() {
     std::printf("parse + sheets  : %8.2f ms\n", ms(t1, t2));
     std::printf("style + layout  : %8.2f ms (document height %.0f px)\n", ms(t2, t3), h);
     std::printf("paint + raster  : %8.2f ms (1024x768 viewport)\n", ms(t3, t4));
+
+    // Same document with TrueType system fonts (if any are installed): layout needs real advances, paint rasterizes glyphs.
+    if (HB::FontProvider::instance().discoverSystemFonts() > 0) {
+        HB::Page p2;
+        p2.setViewport(1024, 768, 1.0f);
+        p2.setSource(html, {});
+        auto u0 = Clock::now();
+        float h2 = p2.documentHeight();
+        auto u1 = Clock::now();
+        p2.render();   // cold glyph cache
+        auto u2 = Clock::now();
+        p2.render();   // warm glyph cache
+        auto u3 = Clock::now();
+        std::printf("-- with TrueType fonts: %s\n", HB::FontProvider::instance().describe().c_str());
+        std::printf("style + layout  : %8.2f ms (document height %.0f px)\n", ms(u0, u1), h2);
+        std::printf("paint (cold)    : %8.2f ms\n", ms(u1, u2));
+        std::printf("paint (warm)    : %8.2f ms\n", ms(u2, u3));
+    }
     return 0;
 }

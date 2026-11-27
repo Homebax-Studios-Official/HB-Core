@@ -1,11 +1,12 @@
 # Next tasks (in order)
 
-1. Run the build on Windows (MSVC, x64) and fix portability issues; verify `HBCORE_TARGET_WIN7` with a real toolchain.
-2. Run the build with the Android NDK (arm64-v8a); add JNI + Kotlin wrapper in `bindings/android`.
-3. Native presenters in `platform/*` (GDI/D3D blit, X11/Wayland helper, ANativeWindow) + input event API
-   (mouse/keyboard/touch/focus), hit testing and link navigation.
-4. FreeType/HarfBuzz/ICU text pipeline; record dependencies in THIRD_PARTY_NOTICES.md.
-5. Image decoding and `<img>`.
-6. Import Web Platform Tests subset runner (`tools/`), start tracking pass rates in SUPPORT_MATRIX.md.
-7. Recursion depth limits and a fuzzing harness for tokenizer/parser/CSS (libFuzzer).
-8. Begin HB.JavaScript (lexer, parser, AST) with Test262 harness.
+1. Build on Windows (MSVC x64) - first compile of `platform/windows` and `examples/win32_demo.cpp`; fix portability issues;
+   verify `HBCORE_TARGET_WIN7` with a real toolchain and test on Windows 7/8/10/11.
+2. Android: NDK build (arm64-v8a), JNI + Kotlin wrapper, `ANativeWindow` presenter; touch input API.
+3. Layout 0.4: inline-block, floats, `position`, flexbox, tables, percent heights, `calc()`; text selection and caret.
+4. HB.Network 0.3: HTTP/1.1 + TLS (library chosen after license/compatibility review), cookies, HTTP cache,
+   downloads (download events), redirects; `http(s)` navigation; remote `<img>`/stylesheets.
+5. Fuzzing (libFuzzer) for tokenizer, CSS parser, PNG decoder, TrueType reader; recursion depth limits.
+6. JPEG/GIF/WebP decoders, SVG (basic), OpenType/CFF fonts, per-glyph font fallback.
+7. HB.JavaScript 0.5 (lexer, parser, AST, bytecode, VM, GC) with Test262 harness; DOM bindings; console events.
+8. Web Platform Tests subset runner in `tools/`.

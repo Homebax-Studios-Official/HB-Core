@@ -1,6 +1,7 @@
 // HB Core - Homebax Studios. Copyright (c) 2026 Ondrej Jurasik / Homebax Studios.
 #include "graphics/surface.hpp"
 #include "graphics/bitmap_font.hpp"
+#include "graphics/fonts.hpp"
 #include "base/strings.hpp"
 #include <algorithm>
 #include <cmath>
@@ -85,6 +86,75 @@ void Surface::fillCircle(float cx, float cy, float radius, Color c) {
 }
 
 float Surface::drawText(float x, float y, std::string_view utf8, const TextStyle& st) {
+    FontProvider& fp = FontProvider::instance();
+    FaceRef face = fp.select(st.family, st.bold, st.italic);
+    if (!face.font) return drawBitmapText(x, y, utf8, st);
+
+    IntRect clip = currentClip();
+    const float size = st.fontSize;
+    const float asc = fp.ascentPx(face, size), desc = fp.descentPx(face, size);
+    const float baseline = y + (size - (asc + desc)) / 2 + asc;
+    float penX = x;
+    size_t i = 0;
+    while (i < utf8.size()) {
+        char32_t cp = decodeUtf8(utf8, i);
+        if (cp >= 32 && cp != 0x7F) {
+            auto bm = fp.bitmap(face, cp, size);
+            if (bm && bm->width > 0) {
+                int gx = static_cast<int>(std::lround(penX)) + bm->left;
+                int gy = static_cast<int>(std::lround(baseline)) + bm->top;
+                IntRect r = IntRect{gx, gy, gx + bm->width, gy + bm->height}.intersect(clip);
+                for (int py = r.y0; py < r.y1; ++py) {
+                    const uint8_t* row = &bm->alpha[static_cast<size_t>(py - gy) * bm->width];
+                    for (int px = r.x0; px < r.x1; ++px) {
+                        uint8_t a = row[px - gx];
+                        if (a) blend(px, py, st.color, a / 255.0f);
+                    }
+                }
+            }
+        }
+        penX += fp.advance(face, cp, size);
+    }
+    float width = penX - x;
+    float thick = std::max(1.0f, size / 14.0f);
+    if (st.underline) fillRect(x, baseline + size * 0.1f, width, thick, st.color);
+    if (st.lineThrough) fillRect(x, baseline - asc * 0.35f, width, thick, st.color);
+    return width;
+}
+
+void Surface::drawImage(float x, float y, float w, float h, const Image& img, float opacity) {
+    if (w <= 0 || h <= 0 || img.width <= 0 || img.height <= 0) return;
+    IntRect clip = currentClip();
+    IntRect r = IntRect{static_cast<int>(std::lround(x)), static_cast<int>(std::lround(y)),
+                        static_cast<int>(std::lround(x + w)), static_cast<int>(std::lround(y + h))};
+    int dx0 = r.x0, dy0 = r.y0;
+    float dw = static_cast<float>(std::max(1, r.x1 - r.x0)), dh = static_cast<float>(std::max(1, r.y1 - r.y0));
+    r = r.intersect(clip);
+    for (int py = r.y0; py < r.y1; ++py) {
+        float sy = (py - dy0 + 0.5f) / dh * img.height - 0.5f;
+        int y0 = std::clamp(static_cast<int>(std::floor(sy)), 0, img.height - 1);
+        int y1 = std::min(y0 + 1, img.height - 1);
+        float fy = std::clamp(sy - y0, 0.0f, 1.0f);
+        for (int px = r.x0; px < r.x1; ++px) {
+            float sx = (px - dx0 + 0.5f) / dw * img.width - 0.5f;
+            int x0 = std::clamp(static_cast<int>(std::floor(sx)), 0, img.width - 1);
+            int x1 = std::min(x0 + 1, img.width - 1);
+            float fx = std::clamp(sx - x0, 0.0f, 1.0f);
+            float ch[4];
+            for (int c = 0; c < 4; ++c) {
+                float a = img.rgba[(static_cast<size_t>(y0) * img.width + x0) * 4 + c];
+                float b = img.rgba[(static_cast<size_t>(y0) * img.width + x1) * 4 + c];
+                float cc = img.rgba[(static_cast<size_t>(y1) * img.width + x0) * 4 + c];
+                float d = img.rgba[(static_cast<size_t>(y1) * img.width + x1) * 4 + c];
+                ch[c] = (a * (1 - fx) + b * fx) * (1 - fy) + (cc * (1 - fx) + d * fx) * fy;
+            }
+            Color col{static_cast<uint8_t>(ch[0] + 0.5f), static_cast<uint8_t>(ch[1] + 0.5f), static_cast<uint8_t>(ch[2] + 0.5f), 255};
+            blend(px, py, col, (ch[3] / 255.0f) * opacity);
+        }
+    }
+}
+
+float Surface::drawBitmapText(float x, float y, std::string_view utf8, const TextStyle& st) {
     const float adv = glyphAdvance(st.fontSize);
     const float cellH = st.fontSize;
     IntRect clip = currentClip();

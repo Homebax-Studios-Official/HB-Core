@@ -1,6 +1,6 @@
 // HB Core - Homebax Studios. Copyright (c) 2026 Ondrej Jurasik / Homebax Studios.
 #include "paint/display_list.hpp"
-#include "graphics/bitmap_font.hpp"
+#include "graphics/fonts.hpp"
 #include <algorithm>
 
 namespace HB {
@@ -23,6 +23,7 @@ void addRect(DisplayList& l, float x, float y, float w, float h, Color c) {
 TextStyle toTextStyle(const ComputedStyle& s) {
     TextStyle t;
     t.fontSize = s.fontSize;
+    t.family = s.fontFamily;
     t.bold = s.bold;
     t.italic = s.italic;
     t.underline = s.underline;
@@ -64,7 +65,7 @@ void paintBox(const LayoutBox& b, float originX, float originY, DisplayList& lis
             t.textStyle.underline = false;
             t.textStyle.lineThrough = false;
             t.text = b.markerText;
-            float w = measureText(b.markerText, st.fontSize);
+            float w = measureStyledText(b.markerText, st.fontSize, st.fontFamily, st.bold, st.italic);
             t.x = cx - w - st.fontSize * 0.4f;
             t.y = midY - st.fontSize / 2;
             list.items.push_back(std::move(t));
@@ -84,7 +85,19 @@ void paintBox(const LayoutBox& b, float originX, float originY, DisplayList& lis
             for (const auto& f : line.fragments) {
                 const ComputedStyle& fs = *f.style;
                 if (!fs.visible) continue;
-                float fy = cy + line.y + (line.height - fs.fontSize) / 2;
+                if (f.image) {
+                    DisplayItem im;
+                    im.type = DisplayItem::Type::DrawImage;
+                    im.x = cx + f.x;
+                    im.y = cy + line.y + line.baseline - f.imageHeight;
+                    im.w = f.width; im.h = f.imageHeight;
+                    im.image = f.image;
+                    im.color.a = static_cast<uint8_t>(fs.opacity * 255 + 0.5f);
+                    list.items.push_back(std::move(im));
+                    continue;
+                }
+                float fy = line.hasImage ? cy + line.y + line.baseline - fs.fontSize * 0.8f
+                                         : cy + line.y + (line.height - fs.fontSize) / 2;
                 if (fs.display == Display::Inline && fs.backgroundColor.a > 0) {
                     addRect(list, cx + f.x, fy - fs.fontSize * 0.1f, f.width, fs.fontSize * 1.2f, withOpacity(fs.backgroundColor, fs.opacity));
                 }
@@ -137,6 +150,12 @@ void rasterize(const DisplayList& list, Surface& surface, float scrollY, float s
                 float y = (it.y - scrollY) * scale;
                 if (y - it.w * scale > viewH || y + it.w * scale < 0) break;
                 surface.fillCircle(it.x * scale, y, it.w * scale, it.color);
+                break;
+            }
+            case DisplayItem::Type::DrawImage: {
+                float y = (it.y - scrollY) * scale, h = it.h * scale;
+                if (y > viewH || y + h < 0 || !it.image) break;
+                surface.drawImage(it.x * scale, y, it.w * scale, h, *it.image, it.color.a / 255.0f);
                 break;
             }
             case DisplayItem::Type::DrawText: {

@@ -9,7 +9,7 @@
 using namespace HB;
 
 namespace {
-CoreConfig quiet() { CoreConfig c; c.logLevel = 5; return c; }
+CoreConfig quiet() { CoreConfig c; c.logLevel = 5; c.useSystemFonts = false; return c; }
 const char* kPage = "<html><head><title>T1</title></head><body><h1>Hi</h1></body></html>";
 }
 
@@ -22,7 +22,7 @@ TEST(Api, CoreLifecycle) {
     CoreConfig bad = quiet(); bad.memoryLimitMB = 0;
     Core c2;
     EXPECT_FALSE(c2.initialize(bad).ok());
-    EXPECT_EQ(std::string(Core::version()), std::string("0.1.0"));
+    EXPECT_EQ(std::string(Core::version()), std::string("0.2.0"));
 }
 
 TEST(Api, LoadHtmlEventsTitleAndHistory) {

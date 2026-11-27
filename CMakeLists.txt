@@ -76,10 +76,10 @@ hbcore_module(base SOURCES
 hbcore_module(dom SOURCES core/dom/node.cpp DEPS hb_base)
 hbcore_module(html SOURCES core/html/tokenizer.cpp core/html/parser.cpp DEPS hb_dom)
 hbcore_module(css SOURCES core/css/color.cpp core/css/stylesheet.cpp core/css/style.cpp core/css/ua_stylesheet.cpp DEPS hb_dom)
-hbcore_module(graphics SOURCES core/graphics/bitmap_font.cpp core/graphics/surface.cpp DEPS hb_css)
+hbcore_module(graphics SOURCES core/graphics/bitmap_font.cpp core/graphics/image.cpp core/graphics/truetype.cpp core/graphics/fonts.cpp core/graphics/surface.cpp DEPS hb_css)
 hbcore_module(layout SOURCES core/layout/layout.cpp DEPS hb_css hb_graphics)
 hbcore_module(paint SOURCES core/paint/painter.cpp DEPS hb_layout hb_graphics)
-hbcore_module(engine SOURCES core/engine/page.cpp DEPS hb_html hb_paint)
+hbcore_module(engine SOURCES core/engine/page.cpp core/engine/url.cpp DEPS hb_html hb_paint)
 
 set(HBCORE_API_SOURCES core/engine/hb_core.cpp bindings/c/hb_core_c.cpp)
 
@@ -108,6 +108,15 @@ if(HBCORE_BUILD_STATIC)
         $<INSTALL_INTERFACE:include>)
     set_target_properties(hbcore_static PROPERTIES OUTPUT_NAME hbcore_static)
     hbcore_warnings(hbcore_static)
+endif()
+
+# Win32 host helpers (GDI presenter + input translation). UNVERIFIED: not compiled in the 0.2.0 build environment.
+if(WIN32 AND HBCORE_BUILD_SHARED)
+    add_library(hbcore_win32 STATIC platform/windows/hb_win32.cpp)
+    add_library(HB::Win32 ALIAS hbcore_win32)
+    target_include_directories(hbcore_win32 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/platform/windows)
+    target_link_libraries(hbcore_win32 PUBLIC hbcore)
+    hbcore_warnings(hbcore_win32)
 endif()
 
 if(HBCORE_BUILD_EXAMPLES)

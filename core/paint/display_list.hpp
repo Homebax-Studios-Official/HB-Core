@@ -1,5 +1,6 @@
 // HB Core - Homebax Studios. Copyright (c) 2026 Ondrej Jurasik / Homebax Studios.
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 #include "graphics/surface.hpp"
@@ -8,11 +9,12 @@
 namespace HB {
 
 struct DisplayItem {
-    enum class Type { FillRect, FillCircle, DrawText, PushClip, PopClip } type = Type::FillRect;
+    enum class Type { FillRect, FillCircle, DrawText, DrawImage, PushClip, PopClip } type = Type::FillRect;
     float x = 0, y = 0, w = 0, h = 0;  // CSS pixels, document coordinates (circle: x,y = centre, w = radius)
     Color color;
     std::string text;
     TextStyle textStyle;
+    std::shared_ptr<const Image> image;  // DrawImage; opacity in color.a
 };
 
 struct DisplayList {

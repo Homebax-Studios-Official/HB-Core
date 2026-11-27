@@ -37,8 +37,15 @@ HB Core 0.1.0 has no window presenter. On each frame (or after events) call `hb_
 and blit into the host surface (Windows: `StretchDIBits`/D3D texture upload; remember RGBA -> BGRA).
 Forward `resize`, DPI changes (`hb_view_set_device_pixel_ratio`) and scrolling (`hb_view_scroll_by`).
 
+## 4b. Input and window helpers (0.2.0)
+Forward host events to `hb_view_mouse_move/down/up`, `hb_view_mouse_wheel`, `hb_view_key_down`, `hb_view_set_focus`
+(coordinates in viewport CSS px = window pixels / DPR). Use `hb_view_get_cursor` after `HB_EVENT_CURSOR_CHANGED`.
+Handle `HB_EVENT_NEW_WINDOW_REQUESTED` (open a tab) and `HB_EVENT_CONTEXT_MENU_REQUESTED` (show your menu) yourself.
+On Windows `platform/windows/hb_win32.*` (target `HB::Win32`) does presenting and message translation for a plain HWND;
+it is **not compiled or tested yet** - expect small fixes on first build. `examples/win32_demo.cpp` shows the wiring.
+
 ## 5. What will not work yet
-http(s) pages, JavaScript, input events, downloads, permissions, new windows, media. HB Browser must keep WebView2
+http(s) pages, JavaScript, downloads, permissions, media, touch, text selection, forms. HB Browser must keep WebView2
 (or another engine) for real web browsing until those milestones are done.
 
 ## 6. License

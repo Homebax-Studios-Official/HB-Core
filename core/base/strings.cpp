@@ -92,4 +92,27 @@ void appendUtf8(std::string& out, char32_t cp) {
     }
 }
 
+std::string base64Decode(std::string_view in, bool* ok) {
+    std::string out;
+    uint32_t acc = 0;
+    int bits = 0;
+    bool valid = true;
+    for (char c : in) {
+        int v;
+        if (c >= 'A' && c <= 'Z') v = c - 'A';
+        else if (c >= 'a' && c <= 'z') v = c - 'a' + 26;
+        else if (c >= '0' && c <= '9') v = c - '0' + 52;
+        else if (c == '+' || c == '-') v = 62;
+        else if (c == '/' || c == '_') v = 63;
+        else if (c == '=') break;
+        else if (isAsciiSpace(c)) continue;
+        else { valid = false; break; }
+        acc = (acc << 6) | static_cast<uint32_t>(v);
+        bits += 6;
+        if (bits >= 8) { bits -= 8; out.push_back(static_cast<char>((acc >> bits) & 0xFF)); }
+    }
+    if (ok) *ok = valid;
+    return valid ? out : std::string();
+}
+
 } // namespace HB

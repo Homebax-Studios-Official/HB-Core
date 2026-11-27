@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "css/color.hpp"
+#include "css/font_family.hpp"
 #include "css/stylesheet.hpp"
 #include "dom/node.hpp"
 
@@ -37,6 +38,7 @@ struct ComputedStyle {
     Color color{0, 0, 0, 255};
     Color backgroundColor = Color::transparent();
     float fontSize = 16;
+    FontFamily fontFamily = FontFamily::Sans;
     bool bold = false;
     bool italic = false;
     bool underline = false;

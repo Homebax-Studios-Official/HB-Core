@@ -3,6 +3,7 @@
 #include <hbcore/hb_core.h>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
 #include <string>
 
 static const char* kHello =
@@ -32,7 +33,10 @@ int main(int argc, char** argv) {
     HB::Error err;
     if (input.empty()) err = view.loadHTML(kHello);
     else if (input.find("://") != std::string::npos) err = view.loadURL(input);
-    else err = view.loadURL("file://" + input);
+    else {
+        std::string abs = std::filesystem::absolute(input).generic_string();
+        err = view.loadURL("file://" + std::string(abs.empty() || abs[0] != '/' ? "/" : "") + abs);  // C:/x -> file:///C:/x
+    }
     if (!err.ok()) { std::fprintf(stderr, "load failed: %s\n", err.message.c_str()); return 2; }
 
     err = view.savePNG(output);

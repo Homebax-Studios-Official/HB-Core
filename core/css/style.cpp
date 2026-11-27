@@ -199,6 +199,23 @@ void applyProperty(const std::string& name, const std::string& rawValue, Ctx& c)
                 if (v >= 0) s.fontSize = v;
             }
         }
+    } else if (name == "font-family") {
+        // First recognised family in the list decides: monospace / serif / sans-serif groups.
+        static const char* kMono[] = {"monospace", "courier", "courier new", "consolas", "menlo", "monaco", "lucida console", "dejavu sans mono", "liberation mono", "jetbrains mono", "fira code", "source code pro"};
+        static const char* kSerif[] = {"serif", "times", "times new roman", "georgia", "garamond", "cambria", "palatino", "book antiqua", "liberation serif", "dejavu serif"};
+        static const char* kSans[] = {"sans-serif", "arial", "helvetica", "verdana", "tahoma", "segoe ui", "system-ui", "roboto", "calibri", "trebuchet ms", "liberation sans", "dejavu sans", "noto sans", "inter", "-apple-system"};
+        size_t pos = 0;
+        while (pos <= lower.size()) {
+            size_t comma = lower.find(',', pos);
+            std::string tok(trim(std::string_view(lower).substr(pos, comma == std::string::npos ? std::string::npos : comma - pos)));
+            if (tok.size() >= 2 && (tok.front() == '"' || tok.front() == '\'') && tok.back() == tok.front()) tok = tok.substr(1, tok.size() - 2);
+            bool done = false;
+            for (auto m : kMono) if (tok == m) { s.fontFamily = FontFamily::Mono; done = true; }
+            for (auto m : kSerif) if (!done && tok == m) { s.fontFamily = FontFamily::Serif; done = true; }
+            for (auto m : kSans) if (!done && tok == m) { s.fontFamily = FontFamily::Sans; done = true; }
+            if (done || comma == std::string::npos) break;
+            pos = comma + 1;
+        }
     } else if (name == "font-weight") {
         if (lower == "bold" || lower == "bolder") s.bold = true;
         else if (lower == "normal" || lower == "lighter") s.bold = false;
@@ -331,6 +348,7 @@ ComputedStyle StyleResolver::compute(const Element& el, const ComputedStyle* par
     if (parent) {
         s.color = parent->color;
         s.fontSize = parent->fontSize;
+        s.fontFamily = parent->fontFamily;
         s.bold = parent->bold;
         s.italic = parent->italic;
         s.underline = parent->underline;

@@ -22,10 +22,10 @@ Each module is a static library `hb_<name>` with its own test executable.
 | hb_dom | base | Node tree |
 | hb_html | dom | Tokenizer, tree builder |
 | hb_css | dom | Parser, selectors, cascade, ComputedStyle, UA stylesheet |
-| hb_graphics | css (Color) | Surface, bitmap font, PNG |
+| hb_graphics | css (Color, FontFamily) | Surface, bitmap font, TrueType reader/rasterizer, FontProvider, PNG encode/decode |
 | hb_layout | css, graphics (font metrics) | Box tree, block/inline layout |
 | hb_paint | layout, graphics | Display list + rasterization |
-| hb_engine | html, paint | Page pipeline |
+| hb_engine | html, paint | Page pipeline, URL resolution |
 | hbcore / hbcore_static | engine | Public C++ API + C ABI |
 
 Folders `compositor`, `javascript`, `webapi`, `network`, `media`, `storage`, `security`,
@@ -34,7 +34,9 @@ Folders `compositor`, `javascript`, `webapi`, `network`, `media`, `storage`, `se
 ## Decisions
 - **Layout units** are CSS px (float); rasterization scales by device pixel ratio.
 - **Margins** use the classic collapse rules; layout is computed in parent-relative coordinates and made absolute during painting.
-- **Fonts**: a built-in bitmap font keeps 0.1.0 dependency-free; FreeType/HarfBuzz/ICU come next.
+- **Fonts**: an own TrueType reader/rasterizer renders system fonts (no dependency, no bundled font); the 8x8 bitmap font is the fallback. HarfBuzz/ICU shaping is planned.
+- **Images**: own PNG decoder (own inflate); decoded during layout and cached per page.
+- **Input**: hit testing walks the layout tree (boxes + line fragments, each fragment knows its DOM element); the View turns clicks into navigation/events.
 - **Errors**: `Result<T>`/`Error` instead of exceptions across module boundaries; the C ABI additionally catches everything.
 - **Public C++ API** is pimpl-based; use the C ABI where binary stability matters.
 - **Ownership**: the DOM owns nodes via `unique_ptr`; layout boxes and styles live in the `LayoutTree` arena.

@@ -1,15 +1,15 @@
 # HB Core
 
-**Independent web browser engine SDK by Homebax Studios** - version 0.1.0
+**Independent web browser engine SDK by Homebax Studios** - version 0.2.0
 Author: Ondrej Jurasik - Copyright (c) 2026 Homebax Studios - [Non-Commercial License](LICENSE)
 
 HB Core is written from scratch in C++20 (HTML parser, DOM, CSS, layout, painting, CPU rasterizer).
 It is an embeddable SDK for **HB Browser** - it has no tab bar, address bar, bookmarks or
 history UI. It is **not** a wrapper around Chromium, WebKit, Gecko, WebView2, CEF, Qt WebEngine or Electron.
 
-> **Honest status:** 0.1.0 is the *foundation milestone*. It renders static HTML + CSS pages from
-> `file://`, `data:` URLs or strings into an RGBA framebuffer. It has **no JavaScript, no networking,
-> no GPU backend and no sandbox yet.** See [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md) and
+> **Honest status:** 0.2.0 renders static HTML + CSS pages (TrueType text, PNG images, links, scrolling, input events)
+> from `file://`, `data:` URLs or strings into an RGBA framebuffer. It has **no JavaScript, no networking,
+> no GPU backend and no sandbox yet** - HB Browser must keep another engine for real web browsing. See [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md) and
 > [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
 
 ## Quick start (Linux)
@@ -37,6 +37,9 @@ view.setEventHandler([](const HB::ViewEvent& e) { /* navigation, title, url, err
 view.loadHTML("<h1>Hello HB Core</h1>");
 HB::Framebuffer fb = view.render();   // RGBA8 pixels for your window
 ```
+Input (viewport CSS px): `view.mouseMove/mouseDown/mouseUp/mouseWheel/keyDown/setFocus`; link clicks navigate and
+produce events (`HoverLinkChanged`, `NewWindowRequested`, `ContextMenuRequested`, `CursorChanged`).
+Fonts: system TrueType fonts are found automatically (`CoreConfig::useSystemFonts`, `fontDirectory`, `core.loadFont(...)`).
 `executeJavaScript()` exists but returns `ErrorCode::Unsupported` until HB.JavaScript is written.
 
 ## C ABI

@@ -9,7 +9,7 @@ required = [
     "THIRD_PARTY_NOTICES.md", "SECURITY.md", "SUPPORT_MATRIX.md", "AGENTS.md",
     "docs/DEVELOPMENT_STATUS.md", "docs/IMPLEMENTATION_PLAN.md", "docs/ARCHITECTURE.md",
     "docs/KNOWN_ISSUES.md", "docs/NEXT_TASKS.md", "docs/INTEGRATION.md",
-    "include/hbcore/hb_core.h", "include/hbcore/hb_core_c.h",
+    "include/hbcore/hb_core.h", "include/hbcore/hb_core_c.h", "platform/windows/hb_win32.h",
     "resources/branding/hbcore-logo.svg", "resources/icons/hbcore-icon.svg",
 ]
 missing = [f for f in required if not (root / f).exists()]

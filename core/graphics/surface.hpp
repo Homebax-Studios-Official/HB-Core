@@ -5,6 +5,8 @@
 #include <string_view>
 #include <vector>
 #include "css/color.hpp"
+#include "css/font_family.hpp"
+#include "graphics/image.hpp"
 
 namespace HB {
 
@@ -21,6 +23,7 @@ struct TextStyle {
     bool underline = false;
     bool lineThrough = false;
     Color color{0, 0, 0, 255};
+    FontFamily family = FontFamily::Sans;
 };
 
 // CPU software rendering surface: RGBA8, straight alpha, source-over blending.
@@ -39,7 +42,10 @@ public:
     // Coordinates are in surface pixels. Edges are snapped to whole pixels; non-empty rects are at least 1px.
     void fillRect(float x, float y, float w, float h, Color c);
     void fillCircle(float cx, float cy, float radius, Color c);
-    // y is the top of the text cell; the cell height equals fontSize. Returns the advance width.
+    // Draws the image scaled to the destination rectangle (bilinear when scaling, alpha blended, clipped).
+    void drawImage(float x, float y, float w, float h, const Image& img, float opacity = 1.0f);
+    // y is the top of the text cell; the cell height equals fontSize. Uses outline fonts from FontProvider when
+    // available, the built-in bitmap font otherwise. Returns the advance width.
     float drawText(float x, float y, std::string_view utf8, const TextStyle& style);
 
     void pushClip(float x, float y, float w, float h);
@@ -47,6 +53,7 @@ public:
     Color pixel(int x, int y) const;
 
 private:
+    float drawBitmapText(float x, float y, std::string_view utf8, const TextStyle& style);
     void blend(int x, int y, Color c, float coverage);
     IntRect currentClip() const;
 

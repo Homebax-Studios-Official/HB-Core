@@ -23,4 +23,7 @@ char32_t decodeUtf8(std::string_view s, size_t& pos);
 std::u32string utf8ToUtf32(std::string_view s);
 void appendUtf8(std::string& out, char32_t cp);
 
+// Decodes standard base64 (whitespace ignored, padding optional). ok=false on invalid characters.
+std::string base64Decode(std::string_view in, bool* ok = nullptr);
+
 } // namespace HB

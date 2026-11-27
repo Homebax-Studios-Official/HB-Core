@@ -18,10 +18,12 @@
 namespace HB {
 
 struct CoreConfig {
-    bool enableJavaScript = true;   // accepted; no JavaScript engine exists in 0.1.0
-    bool enableGPU = false;         // accepted; only the CPU renderer exists in 0.1.0
+    bool enableJavaScript = true;   // accepted; no JavaScript engine exists yet
+    bool enableGPU = false;         // accepted; only the CPU renderer exists yet
     uint32_t memoryLimitMB = 512;   // upper bound for documents; a document may use at most 1/8 of it as source text
     int logLevel = 2;               // 0 trace, 1 debug, 2 info, 3 warning, 4 error, 5 off
+    bool useSystemFonts = true;     // look for TrueType system fonts (Segoe UI/Arial, Liberation, DejaVu, Noto, Roboto ...)
+    std::string fontDirectory;      // optional extra directory searched first (also: environment variable HBCORE_FONT_DIR)
 };
 
 struct ViewConfig {
@@ -36,14 +38,23 @@ enum class ViewEventType {
     NavigationFailed,
     TitleChanged,
     UrlChanged,
-    Error
+    Error,
+    HoverLinkChanged,     // text = absolute URL under the mouse, empty when the mouse left the link
+    CursorChanged,        // use View::cursor()
+    ContextMenuRequested, // text = link URL under the pointer (may be empty), x/y in viewport CSS px
+    NewWindowRequested    // text = absolute URL (ctrl/middle click or target=_blank); the host decides what to do
 };
 
 struct ViewEvent {
     ViewEventType type = ViewEventType::Error;
     std::string text;   // url, title or message
     ErrorCode code = ErrorCode::Ok;
+    float x = 0, y = 0; // ContextMenuRequested: pointer position
 };
+
+enum class MouseButton { Left, Middle, Right };
+enum class Key { Up, Down, PageUp, PageDown, Home, End, Space };
+enum class CursorType { Arrow, Hand, Text };
 
 // Read-only view of the rendered RGBA8 pixels. Valid until the next render()/resize on the view.
 struct Framebuffer {
@@ -62,10 +73,16 @@ public:
     Core(const Core&) = delete;
     Core& operator=(const Core&) = delete;
 
+    // Initializes the engine and, if enabled, discovers system fonts (process-wide, done once).
     Error initialize(const CoreConfig& config);
     bool isInitialized() const;
     const CoreConfig& config() const;
     void shutdown();
+
+    // Registers a TrueType font file. family: "sans", "serif" or "mono". Returns false if unusable.
+    bool loadFont(const std::string& family, bool bold, bool italic, const std::string& path);
+    // Description of the active fonts (for logging/diagnostics).
+    std::string fontInfo() const;
 
     static const char* version();
 
@@ -82,7 +99,7 @@ public:
     View(const View&) = delete;
     View& operator=(const View&) = delete;
 
-    // Navigation. Supported URL schemes in 0.1.0: file://, data:text/html, about:blank.
+    // Navigation. Supported URL schemes: file://, data:text/html, about:blank (fragment links #id are supported).
     Error loadURL(const std::string& url);
     Error loadHTML(const std::string& html);
     Error goBack();
@@ -103,6 +120,19 @@ public:
 
     std::string title() const;
     std::string url() const;
+
+    // ---- Input. Coordinates are viewport CSS pixels (origin = top-left of the view). ----
+    void mouseMove(float x, float y);
+    void mouseDown(float x, float y, MouseButton button);
+    // A click on a link is completed here: left = navigate, ctrl/middle/target=_blank = NewWindowRequested,
+    // right = ContextMenuRequested.
+    void mouseUp(float x, float y, MouseButton button, bool ctrl = false);
+    void mouseWheel(float deltaY);  // CSS px, positive scrolls down
+    void keyDown(Key key, bool shift = false);  // scroll keys; only acted on while the view has focus
+    void setFocus(bool focused);
+    bool hasFocus() const;
+    CursorType cursor() const;
+    std::string linkAt(float x, float y);  // absolute URL of the link under the point, or empty
 
     // Renders into the view's internal framebuffer (CPU renderer).
     Framebuffer render();

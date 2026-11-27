@@ -1,6 +1,7 @@
 // HB Core - C ABI implementation. Copyright (c) 2026 Ondrej Jurasik / Homebax Studios.
 #include "hbcore/hb_core_c.h"
 #include "hbcore/hb_core.h"
+#include <cstddef>
 #include <cstring>
 #include <memory>
 #include <new>
@@ -42,6 +43,10 @@ HB_EventType convertType(HB::ViewEventType t) {
         case HB::ViewEventType::NavigationFailed: return HB_EVENT_NAVIGATION_FAILED;
         case HB::ViewEventType::TitleChanged: return HB_EVENT_TITLE_CHANGED;
         case HB::ViewEventType::UrlChanged: return HB_EVENT_URL_CHANGED;
+        case HB::ViewEventType::HoverLinkChanged: return HB_EVENT_HOVER_LINK_CHANGED;
+        case HB::ViewEventType::CursorChanged: return HB_EVENT_CURSOR_CHANGED;
+        case HB::ViewEventType::ContextMenuRequested: return HB_EVENT_CONTEXT_MENU_REQUESTED;
+        case HB::ViewEventType::NewWindowRequested: return HB_EVENT_NEW_WINDOW_REQUESTED;
         default: return HB_EVENT_ERROR;
     }
 }
@@ -77,11 +82,16 @@ const char* hb_result_string(HB_Result r) {
 HB_Core* hb_core_create(const HB_CoreConfig* config) {
     try {
         HB::CoreConfig cfg;
-        if (config && config->struct_size >= sizeof(HB_CoreConfig)) {
+        // struct_size lets old callers (smaller struct) keep working: only read fields that fit.
+        if (config && config->struct_size >= offsetof(HB_CoreConfig, log_level) + sizeof(int32_t)) {
             cfg.enableJavaScript = config->enable_javascript != 0;
             cfg.enableGPU = config->enable_gpu != 0;
             if (config->memory_limit_mb) cfg.memoryLimitMB = config->memory_limit_mb;
             if (config->log_level >= 0 && config->log_level <= 5) cfg.logLevel = config->log_level;
+            if (config->struct_size >= offsetof(HB_CoreConfig, disable_system_fonts) + sizeof(int32_t))
+                cfg.useSystemFonts = config->disable_system_fonts == 0;
+            if (config->struct_size >= offsetof(HB_CoreConfig, font_directory) + sizeof(const char*) && config->font_directory)
+                cfg.fontDirectory = config->font_directory;
         }
         std::unique_ptr<HB_Core> c(new HB_Core());
         if (!c->core.initialize(cfg).ok()) return nullptr;
@@ -92,6 +102,11 @@ HB_Core* hb_core_create(const HB_CoreConfig* config) {
 }
 
 void hb_core_destroy(HB_Core* core) { delete core; }
+
+HB_Result hb_core_load_font(HB_Core* core, const char* family, int bold, int italic, const char* path) {
+    if (!core || !family || !path) return HB_ERROR_INVALID_ARGUMENT;
+    return guarded([&] { return core->core.loadFont(family, bold != 0, italic != 0, path) ? HB_OK : HB_ERROR_INVALID_ARGUMENT; });
+}
 
 HB_View* hb_view_create(HB_Core* core, const HB_ViewConfig* config) {
     if (!core) return nullptr;
@@ -112,6 +127,8 @@ HB_View* hb_view_create(HB_Core* core, const HB_ViewConfig* config) {
             e.type = convertType(ev.type);
             e.text = ev.text.c_str();
             e.code = static_cast<int32_t>(convert(ev.code));
+            e.x = ev.x;
+            e.y = ev.y;
             raw->callback(&e, raw->userData);
         });
         return v.release();
@@ -204,6 +221,28 @@ HB_Result hb_view_save_png(HB_View* view, const char* path) {
     if (!view || !path) return HB_ERROR_INVALID_ARGUMENT;
     return guarded([&] { return convert(view->view->savePNG(path)); });
 }
+
+void hb_view_mouse_move(HB_View* view, float x, float y) { if (view) { try { view->view->mouseMove(x, y); } catch (...) {} } }
+void hb_view_mouse_down(HB_View* view, float x, float y, HB_MouseButton b) {
+    if (view) { try { view->view->mouseDown(x, y, static_cast<HB::MouseButton>(b)); } catch (...) {} }
+}
+void hb_view_mouse_up(HB_View* view, float x, float y, HB_MouseButton b, int ctrl) {
+    if (view) { try { view->view->mouseUp(x, y, static_cast<HB::MouseButton>(b), ctrl != 0); } catch (...) {} }
+}
+void hb_view_mouse_wheel(HB_View* view, float dy) { if (view) { try { view->view->mouseWheel(dy); } catch (...) {} } }
+void hb_view_key_down(HB_View* view, HB_Key key, int shift) {
+    if (view) { try { view->view->keyDown(static_cast<HB::Key>(key), shift != 0); } catch (...) {} }
+}
+void hb_view_set_focus(HB_View* view, int focused) { if (view) view->view->setFocus(focused != 0); }
+HB_Cursor hb_view_get_cursor(HB_View* view) {
+    if (!view) return HB_CURSOR_ARROW;
+    return static_cast<HB_Cursor>(view->view->cursor());
+}
+const char* hb_view_get_link_at(HB_View* view, float x, float y) {
+    if (!view) return "";
+    try { view->url = view->view->linkAt(x, y); return view->url.c_str(); } catch (...) { return ""; }
+}
+float hb_view_get_scroll_y(HB_View* view) { return view ? view->view->scrollY() : 0.0f; }
 
 void hb_view_set_event_callback(HB_View* view, HB_EventCallback cb, void* user_data) {
     if (!view) return;

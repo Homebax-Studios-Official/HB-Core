@@ -25,7 +25,8 @@ ol { list-style-type: decimal; }
 dd { margin-left: 40px; }
 blockquote { margin: 1em 40px; }
 pre { white-space: pre; }
-code, kbd, samp, tt { }
+code, kbd, samp, tt, pre { font-family: monospace; }
+img { display: inline; }
 b, strong, th { font-weight: bold; }
 i, em, cite, var, dfn, address { font-style: italic; }
 u, ins { text-decoration: underline; }
